@@ -51,18 +51,18 @@
   with_items: "{{ecs_block_devices}}"
 
 - name: Common | Format ECS partition(s)
-  filesystem: fstype=xfs dev="{{ item }}1" force=yes
+  filesystem: fstype=xfs dev="{{ item }}p1" force=yes
   with_items: "{{ ecs_block_devices }}"
   tags: disks
 
 - name: Common | Gather block device UUIDs
-  shell: blkid -s UUID -o value {{item}}1
+  shell: blkid -s UUID -o value {{item}}p1
   with_items: "{{ecs_block_devices}}"
   register: uuid
   when: product_version | version_compare('3.2', '<')
 
 - name: Common | Gather block device partition UUIDs
-  shell: blkid -s PARTUUID -o value {{item}}1
+  shell: blkid -s PARTUUID -o value {{item}}p1
   with_items: "{{ecs_block_devices}}"
   register: uuid
   when: product_version | version_compare('3.2', '>=')
@@ -76,7 +76,7 @@
 
 - name: Common | Mount partitions and create fstabs
   mount:
-    src: "{{ item.1 }}1"
+    src: "{{ item.1 }}p1"
     name: "/ecs/uuid-{{ item.0.stdout }}"
     fstype: xfs
     state: mounted
@@ -91,7 +91,7 @@
     label: "/ecs/uuid-{{ item.0.stdout }}"
 
 - name: Common | Create blockbins on partitions
-  script: additional_prep.sh {{ item }}1
+  script: additional_prep.sh {{ item }}p1
   with_items: "{{ ecs_block_devices }}"
 
 - name: Common | Import ECS docker image (This takes a few minutes.)
